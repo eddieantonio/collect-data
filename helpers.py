@@ -14,34 +14,6 @@ class Energy(namedtuple('Energy', 'id configuration test energy')):
                 "{energy:.1f}J".format(**self._asdict()))
 
 
-class KahanSum:
-    """
-    Implements Kahan summation to compute arithmetic mean.
-
-    >>> KahanSum().step(0).step(0).step(0).finalize()
-    0.0
-    >>> KahanSum().step(1e8).step(1.0).step(-1e8).finalize()
-    1.0
-
-    """
-    def __init__(self):
-        self.summation = 0.0
-        self.compensation = 0.0
-
-    def step(self, raw_value):
-        value = float(raw_value)
-        y = value - self.compensation
-        t = self.summation + y
-
-        self.compensation = (t - self.summation) - y
-        self.summation = t
-
-        return self
-
-    def finalize(self):
-        return self.summation
-
-
 class Connection():
     def __init__(self, conn=None, name=':memory:'):
         self.conn = conn if conn is not None else sqlite3.connect(name)
