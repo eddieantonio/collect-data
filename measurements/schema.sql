@@ -46,5 +46,21 @@ CREATE TABLE IF NOT EXISTS measurement(
     power           REAL NOT NULL
 );
 
--- Enables the sequential gathering of run data from the measurment table.
+-- Enables the sequential gathering of run data from the measurement table.
 CREATE INDEX IF NOT EXISTS measurement_run ON measurement (run);
+
+-- Produces the estimated energy consumption of each run of an experiment.
+--
+-- Note: this makes the strong assumption that power measurements are made
+--       at a 1Hz frequency (1 sample per second). This is essential because
+--       energy is estimated using the rectangle method for integration
+--       of power, based on 1 second intervals.
+CREATE VIEW IF NOT EXISTS energy
+AS SELECT configuration, experiment,
+          TOTAL(power) as energy,
+          MIN(timestamp) as started,
+          MAX(timestamp) as ended,
+          (strftime('%s', MAX(timestamp)) - strftime('%s', MIN(timestamp)))
+            as elapsed_time -- in seconds
+     FROM measurement JOIN run ON measurement.run = run.id
+ GROUP BY measurement.run;
