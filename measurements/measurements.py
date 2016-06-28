@@ -12,6 +12,10 @@ here = Path(__file__).parent
 
 
 class Measurements:
+    """
+    Interface to measurements stored in an SQLite3 database.
+    """
+
     def __init__(self, conn=None):
         if conn is None:
             logger.warn("Using transient in-memory SQL database.")
@@ -23,9 +27,9 @@ class Measurements:
         logger.debug('Loading schema from {}'.format(location))
         self._source(location)
 
-    def run_test(self, configuration, test):
+    def run_test(self, configuration, experiment):
         """
-        Start the run of a test.
+        Start a run of an experiment.
 
         To be used in a context manager::
 
@@ -34,19 +38,14 @@ class Measurements:
                 log += power_in_watts
         """
         assert self._configuration_exists(configuration)
-        assert self._test_exists(test)
-        return Run(self.conn, configuration, test)
-
-    def define_test(self, name, description=None):
-        self.conn.execute(r'''
-            INSERT OR REPLACE INTO test(name, description)
-            VALUES (?, ?)
-        ''', (name, description))
-        self.conn.commit()
-
-        return self
+        assert self._experiment_exists(experiment)
+        return Run(self.conn, configuration, experiment)
 
     def define_configuration(self, name, description=None):
+        """
+        Ensures a configuration with the given name exists in the database.
+        """
+
         self.conn.execute(r'''
             INSERT OR REPLACE INTO configuration(name, description)
             VALUES (?, ?)
@@ -55,10 +54,27 @@ class Measurements:
 
         return self
 
+    def define_experiment(self, name, description=None):
+        """
+        Ensures an experiment with the given name exists in the database.
+        """
+
+        self.conn.execute(r'''
+            INSERT OR REPLACE INTO experiment(name, description)
+            VALUES (?, ?)
+        ''', (name, description))
+        self.conn.commit()
+
+        return self
+
     def energy(self):
+        """
+        Yields the energy per each experiment in the database.
+        """
+
         cursor = self.conn.cursor()
         cursor.execute(r'''
-            SELECT id, configuration, test, total(power) as energy
+            SELECT id, configuration, experiment, total(power) as energy
               FROM measurement JOIN run on run.id = measurement.run
             GROUP BY id
         ''')
@@ -70,10 +86,10 @@ class Measurements:
             self.conn.executescript(sqlfile.read())
         return self
 
-    def _test_exists(self, test_name):
+    def _experiment_exists(self, test_name):
         cursor = self.conn.cursor()
         cursor.execute(r'''
-            SELECT 1 FROM test WHERE name = ?
+            SELECT 1 FROM experiment WHERE name = ?
         ''', (test_name,))
         return cursor.fetchone() is not None
 

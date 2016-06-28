@@ -17,7 +17,7 @@ measure = Measurements(sqlite3.connect('/tmp/test'))
 measure.define_configuration('native')
 measure.define_configuration('docker')
 
-measure.define_test('idle')
+measure.define_experiment('idle')
 
 with tqdm(total=2) as progress:
     with measure.run_test('native', 'idle') as test_run:
