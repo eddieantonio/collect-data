@@ -12,7 +12,7 @@ here = path.from_string(__file__).parent
 
 class Run:
     """
-    A run of a given test.
+    A run of a given test. Usage:
 
     >>> with measurements().run_test('docker', 'stackbench') as test:
     ...     test += 90.5
@@ -25,9 +25,17 @@ class Run:
         self.test = test
         self.configuration = configuration
         self.cursor = connection.cursor()
+        self.id = None
 
     def __enter__(self):
         self.cursor.execute('BEGIN TRANSACTION')
+        self.cursor.execute(r'''
+            INSERT INTO run(configuration, test)
+            VALUES (?, ?);
+        ''', (self.configuration, self.test))
+
+        self.id = self.cursor.lastrowid
+
         return self
 
     def __exit__(self, *excinfo):
@@ -46,8 +54,8 @@ class Run:
         assert time.tzinfo is datetime.timezone.utc
 
         self.cursor.execute(r'''
-            INSERT INTO measurement (configuration, test, power, time)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO measurement (run, power, time)
+            VALUES (?, ?, ?)
         ''', (self.configuration, self.test, measurement))
 
         return self
@@ -66,12 +74,32 @@ class Measurements:
             self.conn = conn
 
         self._source(here/'schema.sql')
-        self._source(here/'sample.sql')
 
     def run_test(self, configuration, test):
+        """
+        Start the run of a test.
+        """
         assert self._configuration_exists(configuration)
         assert self._test_exists(test)
         return Run(self.conn, configuration, test)
+
+    def define_test(name, description=None):
+        cursor = self.execute(r'''
+            INSERT OR REPLACE INTO test(name, description)
+            VALUES (?, ?)
+        ''', (name, description))
+        self.conn.commit()
+
+        return self
+
+    def define_configuration(name, description=None):
+        cursor = self.execute(r'''
+            INSERT OR REPLACE INTO configuration(name, description)
+            VALUES (?, ?)
+        ''', (name, description))
+        self.conn.commit()
+
+        return self
 
     def energy(self):
         cursor = self.conn.cursor()
