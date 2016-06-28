@@ -28,8 +28,8 @@ class Measurements:
         assert self._test_exists(test)
         return Run(self.conn, configuration, test)
 
-    def define_test(name, description=None):
-        cursor = self.execute(r'''
+    def define_test(self, name, description=None):
+        self.conn.execute(r'''
             INSERT OR REPLACE INTO test(name, description)
             VALUES (?, ?)
         ''', (name, description))
@@ -37,8 +37,8 @@ class Measurements:
 
         return self
 
-    def define_configuration(name, description=None):
-        cursor = self.execute(r'''
+    def define_configuration(self, name, description=None):
+        self.conn.execute(r'''
             INSERT OR REPLACE INTO configuration(name, description)
             VALUES (?, ?)
         ''', (name, description))

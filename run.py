@@ -46,9 +46,9 @@ class Run:
         assert time.tzinfo is datetime.timezone.utc
 
         self.cursor.execute(r'''
-            INSERT INTO measurement (run, power, time)
+            INSERT INTO measurement (run, power, timestamp)
             VALUES (?, ?, ?)
-        ''', (self.configuration, self.test, measurement))
+        ''', (self.id, measurement, time))
 
         return self
 

@@ -1,23 +1,22 @@
 PRAGMA encoding = "UTF-8";
 
-CREATE TABLE configuration(
+CREATE TABLE IF NOT EXISTS configuration(
     name            TEXT PRIMARY KEY,
     description     TEXT
 );
 
-CREATE TABLE test(
+CREATE TABLE IF NOT EXISTS test(
     name            TEXT PRIMARY KEY,
     description     TEXT
 );
 
-CREATE TABLE run(
+CREATE TABLE IF NOT EXISTS run(
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     configuration   TEXT,   -- configuration.name
-    test            TEXT,   -- test.name
-    started         DATETIME NOT NULL
+    test            TEXT    -- test.name
 );
 
-CREATE TABLE measurement(
+CREATE TABLE IF NOT EXISTS measurement(
     run             INTEGER, -- test_run.id
     timestamp       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     power           REAL NOT NULL
