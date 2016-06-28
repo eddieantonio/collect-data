@@ -8,22 +8,28 @@ from path import Path
 
 here = Path(__file__).parent
 
-def start(conn):
-    program = here/'fake-wattsup.py'
-    assert program.exists()
+class WattsUpMonitor:
+    def __init__(self, conn):
+        program = here/'fake-wattsup.py'
+        assert program.exists()
+        self.conn = conn
 
-    # Start a blocking text stream
-    with subprocess.Popen([program], stdout=subprocess.PIPE) as proc:
-        print("Process open")
+        # Start a blocking text stream
+        with subprocess.Popen([program], stdout=subprocess.PIPE) as proc:
+            self.proc = proc
+            self.wait_for_ready()
+            self.loop()
 
+    def wait_for_ready(self):
         # Read one line
-        buff = proc.stdout.readline()
-        print("Ready!")
+        buff = self.proc.stdout.readline()
 
+    def loop(self):
+        proc = self.proc
         while True:
-            buff = proc.stdout.readline()
+            line_buffer = proc.stdout.readline()
             timestamp = utcnow()
-            measurement = buff.decode("ascii").strip()
+            measurement = line_buffer.decode("ascii").strip()
             print("Got measurement:", measurement, timestamp)
 
 
@@ -33,4 +39,4 @@ def utcnow():
     """
     return datetime.datetime.now(tz=datetime.timezone.utc)
 
-start(None)
+WattsUpMonitor(None)
