@@ -2,9 +2,13 @@
 
 import sqlite3
 import random
+import logging
 from time import sleep
 
 from measurements import Measurements
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 measure = Measurements(sqlite3.connect('/tmp/test'))
 

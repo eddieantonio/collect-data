@@ -1,4 +1,1 @@
-blessings>=1.6
 bpython>=0.15
-requests>=2.10.0
-six>=1.10.0
