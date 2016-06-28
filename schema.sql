@@ -19,7 +19,7 @@ CREATE TABLE run(
 
 CREATE TABLE measurement(
     run             INTEGER, -- test_run.id
-    timestamp       DATETIME NOT NULL,
+    timestamp       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     power           REAL NOT NULL
 );
 
