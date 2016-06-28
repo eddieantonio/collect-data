@@ -57,6 +57,7 @@ class WattsUpMonitor:
         elif message == 'stop_send':
             self.should_send = False
         else:
+            # TODO: Add termination control message?
             raise ValueError('Unknown control message: {}'.format(message))
 
     def send_measurement(self, measurement, timestamp):
@@ -67,32 +68,76 @@ class WattsUpMonitor:
         self.conn.send((message, payload))
 
 
+class WattsUp:
+    """
+    High-level interface to the WattsUp?
+
+    Usage::
+
+        with WattsUp() as client:
+            measurement, timestamp = client.next_measurement()
+            print("Got measurement:", measurement, timestamp)
+            # Take as many measurements as necessary.
+
+    """
+
+    def __init__(self):
+        self._conn, child_conn = Pipe(duplex=True)
+
+        proc = Process(name='WattsUp? Monitor',
+                       target=WattsUpMonitor,
+                       args=(child_conn,))
+        proc.start()
+        assert proc.is_alive()
+
+        self._proc = proc
+        self._wait_until_ready()
+
+    def close(self):
+        self._conn.close()
+        # This might block... indefinitely.
+        self._proc.join()
+
+    def __enter__(self):
+        # Allow sending messages.
+        self._send('send')
+        return self
+
+    def __exit__(self, *exception_info):
+        # Stop sending messages
+        self._send('stop_send')
+
+    def next_measurement(self):
+        """
+        Blocks until the next measurement is available and returns it.
+        """
+
+        status, payload = self._recv()
+        assert status == 'data'
+        measurement, timestamp = payload
+        return measurement, timestamp
+
+    def _wait_until_ready(self):
+        # Block until ready.
+        status, payload = self._recv()
+        assert status == 'ready'
+
+    def _send(self, message):
+        return self._conn.send(message)
+
+    def _recv(self):
+        return self._conn.recv()
+
+
 def utcnow():
     """
     Returns a datetime now in the UTC timezone.
     """
     return datetime.datetime.now(tz=datetime.timezone.utc)
 
+
 if __name__ == '__main__':
-    parent_conn, child_conn = Pipe(duplex=True)
-
-    p = Process(name='WattsUp? Monitor',
-                target=WattsUpMonitor,
-                args=(child_conn,))
-    p.start()
-
-    if not p.is_alive():
-        print("It deaded.")
-        exit(-1)
-
-    # Block until ready.
-    status, payload = parent_conn.recv()
-    assert status == 'ready'
-    # Allow sending messages.
-    parent_conn.send('send')
-
-    while True:
-        status, payload = parent_conn.recv()
-        assert status == 'data'
-        measurement, timestamp = payload
-        print("Got measurement:", measurement, timestamp)
+    with WattsUp() as client:
+        while True:
+            measurement, timestamp = client.next_measurement()
+            print("Got measurement:", measurement, timestamp)
