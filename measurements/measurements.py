@@ -3,8 +3,8 @@
 import sqlite3
 import logging
 
-import path
-from run import Run
+from . import path
+from .run import Run
 
 logger = logging.getLogger(__name__)
 here = path.from_string(__file__).parent
