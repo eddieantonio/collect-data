@@ -53,7 +53,7 @@ class WattsUpMonitor:
         line_buffer = self.proc.stdout.readline()
         timestamp = utcnow()
         measurement = line_buffer.decode("ascii").strip()
-        self.send_measurement(measurement, timestamp)
+        self.send_measurement(float(measurement), timestamp)
 
     def handle_control_message(self):
         """

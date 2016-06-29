@@ -18,10 +18,14 @@ class Measurements:
 
     def __init__(self, conn=None):
         if conn is None:
-            logger.warn("Using transient in-memory SQL database.")
+            logger.warn("Using transient in-memory SQLite database.")
             self.conn = sqlite3.connect(':memory:')
-        else:
+        elif isinstance(conn, sqlite3.Connection):
+            logger.info("Using provided SQLite connection")
             self.conn = conn
+        elif isinstance(conn, str):
+            logger.info("Using SQLite database file: %r", conn)
+            self.conn = sqlite3.connect(conn)
 
         location = here/'schema.sql'
         logger.debug('Loading schema from {}'.format(location))
@@ -52,7 +56,7 @@ class Measurements:
         ''', (name, description))
         self.conn.commit()
 
-        return self
+        return name
 
     def define_experiment(self, name, description=None):
         """
@@ -65,7 +69,7 @@ class Measurements:
         ''', (name, description))
         self.conn.commit()
 
-        return self
+        return name
 
     def energy(self):
         """

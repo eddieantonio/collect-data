@@ -1,36 +1,31 @@
 #!/usr/bin/env python
 
-import sqlite3
-import random
 import logging
-from time import sleep
+from tqdm import trange
 
-from tqdm import tqdm
+from measurements import Measurements, WattsUp
 
-from measurements import Measurements
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-logging.basicConfig(level=logging.DEBUG)
+measure = Measurements('/tmp/test')
 
+measure.define_configuration('native', 'Linux running on Calzone')
+measure.define_experiment('idle', 'Place no load no the computer')
 
-measure = Measurements(sqlite3.connect('/tmp/test'))
+logger.info('Waiting for Watts Up?...')
+wattsup = WattsUp('./test/fake-wattsup.py').wait_until_ready()
+logger.info('Watts Up? ready')
 
-measure.define_configuration('native')
-measure.define_configuration('docker')
-
-measure.define_experiment('idle')
-
-with tqdm(total=2) as progress:
-    with measure.run_test('native', 'idle') as test_run:
+# Repeat the test 60 times.
+for _ in trange(60):
+    with wattsup, measure.run_test('native', 'idle') as test_run:
         for i in range(60):
-            test_run += random.gauss(70.0, 0.9)
-            sleep(1)
-    progress.update(1)
+            watts, timestamp = wattsup.next_measurement()
+            test_run.add_measurement(watts, timestamp)
 
-    with measure.run_test('docker', 'idle') as test_run:
-        for i in range(60):
-            test_run += random.gauss(70.1, 0.9)
-            sleep(1)
-    progress.update(1)
+#wattsup.close()
 
+# Print the statistics back.
 for datum in measure.energy():
     print(datum)
