@@ -84,9 +84,10 @@ class WattsUp:
 
         # Use the test program.
         if executable is None:
-            executable = Path(which('wattsup') or
-                              _raise(ValueError('Could not find wattsup')))
+            executable = (which('wattsup') or
+                          _raise(ValueError('Could not find wattsup')))
 
+        executable = Path(executable)
         assert executable.exists(), \
             'Executable not found: {}'.format(executable)
 
@@ -150,7 +151,7 @@ def utcnow():
 
 
 if __name__ == '__main__':
-    with WattsUp(executable=here/'fake-wattsup.py') as client:
+    with WattsUp(executable=here.parent/'test'/'fake-wattsup.py') as client:
         while True:
             measurement, timestamp = client.next_measurement()
             print("Got measurement:", measurement, timestamp)
