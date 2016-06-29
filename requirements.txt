@@ -3,3 +3,4 @@ path.py>=8.2.1
 requests>=2.10.0
 six>=1.10.0
 tqdm>=4.7.6
+sh>=1.11

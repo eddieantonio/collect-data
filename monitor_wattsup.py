@@ -5,19 +5,17 @@ from multiprocessing import Process, Pipe
 import datetime
 
 from path import Path
+from sh import which
 
 here = Path(__file__).parent
 
 class WattsUpMonitor:
-    def __init__(self, conn):
+    def __init__(self, conn, executable=None):
         self.conn = conn
         self.should_send = False
 
-        program = here/'fake-wattsup.py'
-        assert program.exists()
-
         # Start a blocking text stream
-        with subprocess.Popen([program], stdout=subprocess.PIPE) as proc:
+        with subprocess.Popen([executable], stdout=subprocess.PIPE) as proc:
             self.proc = proc
             self.wait_for_ready()
             self.loop()
@@ -81,12 +79,21 @@ class WattsUp:
 
     """
 
-    def __init__(self):
+    def __init__(self, executable=None):
         self._conn, child_conn = Pipe(duplex=True)
+
+        # Use the test program.
+        if executable is None:
+            executable = Path(which('wattsup') or
+                              _raise(ValueError('Could not find wattsup')))
+
+        assert executable.exists(), \
+            'Executable not found: {}'.format(executable)
 
         proc = Process(name='WattsUp? Monitor',
                        target=WattsUpMonitor,
-                       args=(child_conn,))
+                       args=(child_conn,),
+                       kwargs={'executable': executable})
         proc.start()
         assert proc.is_alive()
 
@@ -129,6 +136,12 @@ class WattsUp:
         return self._conn.recv()
 
 
+def _raise(exception):
+    """
+    Raise an exception (as an expression).
+    """
+    raise exception
+
 def utcnow():
     """
     Returns a datetime now in the UTC timezone.
@@ -137,7 +150,7 @@ def utcnow():
 
 
 if __name__ == '__main__':
-    with WattsUp() as client:
+    with WattsUp(executable=here/'fake-wattsup.py') as client:
         while True:
             measurement, timestamp = client.next_measurement()
             print("Got measurement:", measurement, timestamp)
