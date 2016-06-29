@@ -24,7 +24,7 @@ for _ in trange(60):
             watts, timestamp = wattsup.next_measurement()
             test_run.add_measurement(watts, timestamp)
 
-#wattsup.close()
+wattsup.close()
 
 # Print the statistics back.
 for datum in measure.energy():

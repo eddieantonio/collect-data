@@ -14,25 +14,37 @@ Usage::
 """
 
 import subprocess
-from multiprocessing import Process, Pipe
 import datetime
+
+from multiprocessing import Process, Pipe
+from contextlib import suppress
 
 from path import Path
 from sh import which
 
+__all__ = ['WattsUp']
+
 here = Path(__file__).parent
 
 
+class ExitSuccessfully(BaseException):
+    """
+    Thrown when the WattsUpMonitor exits succesfully.
+    """
+
+
 class WattsUpMonitor:
-    def __init__(self, conn, executable=None):
+    def __init__(self, conn, executable=None, args=None):
         self.conn = conn
         self.should_send = False
 
         # Start a blocking text stream
-        with subprocess.Popen([executable], stdout=subprocess.PIPE) as proc:
+        arg_list = [executable] + list(args or ())
+        with subprocess.Popen(arg_list, stdout=subprocess.PIPE) as proc:
             self.proc = proc
             self.wait_for_ready()
-            self.loop()
+            with suppress(ExitSuccessfully):
+                self.loop()
 
     def wait_for_ready(self):
         # Read one line
@@ -68,8 +80,9 @@ class WattsUpMonitor:
             self.should_send = True
         elif message == 'stop_send':
             self.should_send = False
+        elif message == 'terminate':
+            self.terminate()
         else:
-            # TODO: Add termination control message?
             raise ValueError('Unknown control message: {}'.format(message))
 
     def send_measurement(self, measurement, timestamp):
@@ -78,6 +91,12 @@ class WattsUpMonitor:
 
     def reply(self, message, payload=None):
         self.conn.send((message, payload))
+
+    def terminate(self):
+        self.proc.terminate()
+        self.reply('exit')
+        self.conn.close()
+        raise ExitSuccessfully()
 
 
 class WattsUp:
@@ -93,7 +112,7 @@ class WattsUp:
 
     """
 
-    def __init__(self, executable=None):
+    def __init__(self, executable=None, args=None):
         self._conn, child_conn = Pipe(duplex=True)
 
         # Use the test program.
@@ -103,18 +122,37 @@ class WattsUp:
 
         # Ensure the executable resolves to a real path.
         executable = Path(executable)
-        assert executable.exists(), \
+        assert executable.exists(), (
             'Executable not found: {}'.format(executable)
+        )
 
         proc = Process(name='WattsUp? Monitor',
                        target=WattsUpMonitor,
                        args=(child_conn,),
-                       kwargs={'executable': executable})
+                       kwargs={'executable': executable, 'args': args})
         proc.start()
         assert proc.is_alive()
 
         self._proc = proc
         self._ready = False
+        self._closed = False
+
+    def close(self):
+        """
+        Closes the connection to the Watts Up?
+        """
+        self._send('terminate')
+        self._flush_until_exit()
+
+        self._conn.close()
+        self._proc.join()
+        return self
+
+    def _flush_until_exit(self, timeout=3):
+        while True:
+            status, _ = self._recv()
+            if status == 'exit':
+                return
 
     def next_measurement(self):
         """
@@ -136,11 +174,27 @@ class WattsUp:
             return self
 
         # Block until ready.
-        status, payload = self._recv()
+        status, _ = self._recv()
         assert status == 'ready'
         self._ready = True
 
         return self
+
+    @property
+    def _conn(self):
+        """
+        Pipe connection to the WattsUpMonitor.
+
+        Raises a RuntimeError when access is attempted, but the connection is
+        closed.
+        """
+        if self._real_conn and self._real_conn.closed:
+            raise RuntimeError('Cannot used Watts Up? after calling .close()')
+        return self._real_conn
+
+    @_conn.setter
+    def _conn(self, conn):
+        self._real_conn = conn
 
     def __enter__(self):
         self.wait_until_ready()
@@ -152,7 +206,6 @@ class WattsUp:
     def __exit__(self, *exception_info):
         # Stop sending messages
         self._send('stop_send')
-
 
     def _send(self, message):
         return self._conn.send(message)
@@ -176,7 +229,11 @@ def utcnow():
 
 
 if __name__ == '__main__':
-    with WattsUp(executable=here.parent/'test'/'fake-wattsup.py') as client:
-        while True:
+    client = WattsUp(executable=here.parent/'test'/'fake-wattsup.py',
+                     args=['-D'])
+    with client:
+        for _ in range(2):
             measurement, timestamp = client.next_measurement()
             print("Got measurement:", measurement, timestamp)
+
+    client.close()
