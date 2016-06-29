@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+"""
+High-level interface to the WattsUp? Pro power monitor.
+
+Usage::
+
+    from measurements.wattsup import WattsUp
+
+    with WattsUp('/path/to/wattsup') as client:
+        measurement, timestamp = client.next_measurement()
+        print("Got measurement:", measurement, timestamp)
+        # Take as many measurements as necessary.
+"""
+
 import subprocess
 from multiprocessing import Process, Pipe
 import datetime
@@ -8,6 +21,7 @@ from path import Path
 from sh import which
 
 here = Path(__file__).parent
+
 
 class WattsUpMonitor:
     def __init__(self, conn, executable=None):
@@ -85,8 +99,9 @@ class WattsUp:
         # Use the test program.
         if executable is None:
             executable = (which('wattsup') or
-                          _raise(ValueError('Could not find wattsup')))
+                          _raise(ValueError('Could not find wattsup in PATH')))
 
+        # Ensure the executable resolves to a real path.
         executable = Path(executable)
         assert executable.exists(), \
             'Executable not found: {}'.format(executable)
@@ -99,14 +114,37 @@ class WattsUp:
         assert proc.is_alive()
 
         self._proc = proc
-        self._wait_until_ready()
+        self._ready = False
 
-    def close(self):
-        self._conn.close()
-        # This might block... indefinitely.
-        self._proc.join()
+    def next_measurement(self):
+        """
+        Waits until the next measurement is available and returns it.
+        """
+
+        self.wait_until_ready()
+
+        status, payload = self._recv()
+        assert status == 'data'
+        measurement, timestamp = payload
+        return measurement, timestamp
+
+    def wait_until_ready(self):
+        """
+        Returns when the WattsUp is ready and receiving power measurements.
+        """
+        if self._ready:
+            return self
+
+        # Block until ready.
+        status, payload = self._recv()
+        assert status == 'ready'
+        self._ready = True
+
+        return self
 
     def __enter__(self):
+        self.wait_until_ready()
+
         # Allow sending messages.
         self._send('send')
         return self
@@ -115,20 +153,6 @@ class WattsUp:
         # Stop sending messages
         self._send('stop_send')
 
-    def next_measurement(self):
-        """
-        Blocks until the next measurement is available and returns it.
-        """
-
-        status, payload = self._recv()
-        assert status == 'data'
-        measurement, timestamp = payload
-        return measurement, timestamp
-
-    def _wait_until_ready(self):
-        # Block until ready.
-        status, payload = self._recv()
-        assert status == 'ready'
 
     def _send(self, message):
         return self._conn.send(message)
@@ -142,6 +166,7 @@ def _raise(exception):
     Raise an exception (as an expression).
     """
     raise exception
+
 
 def utcnow():
     """
