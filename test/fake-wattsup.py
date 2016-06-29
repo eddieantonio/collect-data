@@ -16,8 +16,8 @@ from time import sleep
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-u', '--mean', type=float, default=48.1)
-parser.add_argument('-s', '--std-dev', type=float, default=0.2)
+parser.add_argument('-u', '--mean', type=float, default=44.75)
+parser.add_argument('-s', '--std-dev', type=float, default=0.05)
 
 parser.add_argument('-r', '--missing-rate', type=float, default=0.04)
 
