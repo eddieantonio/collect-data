@@ -55,7 +55,7 @@ def test_energy_missing_samples():
     give_or_take = 0
 
     # Chris Solinas found that about 4.0% of samples from the Watts Up? were
-    # missing. Hence, test that we can interpolate them.
+    # missing. Hence, we test that we can interpolate the missing samples.
     samples = fabricate_data(N(μ=avg_watts, σ=give_or_take),
                              duration=test_duration,
                              percent_missing=4.0)

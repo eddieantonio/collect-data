@@ -49,6 +49,10 @@ class EnergyAggregation:
 
     @classmethod
     def install(cls, connection, name='energy'):
+        """
+        Installs the aggregate function named 'energy' on the given SQLite
+        connection. The name is overridable by providing the argument `name`.
+        """
         connection.create_aggregate(name, 2, cls)
 
 
@@ -64,8 +68,8 @@ def interpoloate_missing_measurements(measurements):
     # missing in between.
     measurements.sort(key=lambda s: s.timestamp)
 
-    # Create an auxillary storage for interpolated samples as
-    # to note mutate the original list during iteration.
+    # Create an auxillary storage for interpolated samples as to not mutate
+    # the original list during iteration.
     interpolated = []
 
     for first, second in pairs(measurements):
@@ -82,6 +86,7 @@ def interpoloate_missing_measurements(measurements):
 
         # Interpolation: simply copy the first measurement for as many missing
         # samples as are required.
+        # It's like "floored nearest neighbour" interpolation.
         for i in range(number_missing):
             # Estimated time in milliseconds for this interpolated sample.
             estimated_time = 1000 * (i + 1) + first.timestamp
