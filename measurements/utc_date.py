@@ -21,6 +21,14 @@ from datetime import datetime, timezone
 UNIX_EPOCH = datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
 
 
+def from_timestamp(timestamp):
+    """
+    Returns a datetime object from the given Unix timestamp in milliseconds.
+    """
+    return datetime.fromtimestamp(timestamp / 1000.0,
+                                  tz=timezone.utc)
+
+
 def to_timestamp(date):
     """
     Returns a Unix UTC timestamp in milliseconds as a float.
