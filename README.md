@@ -45,3 +45,19 @@ with wattsup, measure.run_test(config, experiment) as log:
 # Teardown the System-Under-Test
 ...
 ```
+
+
+Test
+----
+
+First, ensure `measurements` is importable:
+
+```sh
+pip install -e .
+```
+
+Then, simply use `setup.py`:
+
+```sh
+python setup.py test
+```
