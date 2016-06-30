@@ -43,13 +43,17 @@ class Run:
 
         assert isinstance(measurement, (int, float))
         if time is None:
-            time = utcnow()
+            time = utc_now()
         assert time.tzinfo is datetime.timezone.utc
 
         self.cursor.execute(r'''
             INSERT INTO measurement (run, power, timestamp)
-            VALUES (:id, :power, datetime(:time))
-        ''', {'id': self.id, 'power': measurement, 'time': time})
+            VALUES (:id, :power, :timestamp)
+        ''', {
+            'id': self.id,
+            'power': measurement,
+            'timestamp': to_timestamp(time)
+        })
 
         return self
 
@@ -61,7 +65,22 @@ class Run:
         return self
 
 
-def utcnow():
+BEGINNING_OF_TIME = datetime.datetime(1970, 1, 1, 0, 0, 0, 0,
+                                      datetime.timezone.utc)
+
+
+def to_timestamp(date):
+    """
+    Returns a Unix UTC timestamp in milliseconds as a float.
+
+    That is, it returns the number of milliseconds since Midnight, January 1,
+    1970 measured from the Greenwich Observatory.
+    """
+    return 1000.0 * (date - BEGINNING_OF_TIME).total_seconds()
+
+
+
+def utc_now():
     """
     Returns a datetime now in the UTC timezone.
     """

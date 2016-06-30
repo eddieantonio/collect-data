@@ -5,6 +5,8 @@ import math
 
 from collections import namedtuple
 
+__all__ = ['EnergyAggregation']
+
 logger = logging.getLogger(__name__)
 
 Measurement = namedtuple('Measurement', 'watts timestamp')
@@ -41,6 +43,7 @@ class EnergyAggregation:
         return self
 
     def finalize(self):
+        self.measurements.sort(key=lambda s: s.timestamp)
         return math.fsum(sample.watts for sample in self.measurements)
 
     @classmethod

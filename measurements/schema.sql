@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS run(
 -- second sampling period (1Hz).
 CREATE TABLE IF NOT EXISTS measurement(
     run             INTEGER, -- test_run.id
-    timestamp       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    timestamp       REAL NOT NULL, -- Unix timestamp in milliseoncds
     power           REAL NOT NULL
 );
 
@@ -60,7 +60,7 @@ AS SELECT configuration, experiment,
           TOTAL(power) as energy,
           MIN(timestamp) as started,
           MAX(timestamp) as ended,
-          (strftime('%s', MAX(timestamp)) - strftime('%s', MIN(timestamp)))
-            as elapsed_time -- in seconds
+          (MAX(timestamp) - MIN(timestamp))
+            as elapsed_time -- in milliseconds
      FROM measurement JOIN run ON measurement.run = run.id
  GROUP BY measurement.run;
