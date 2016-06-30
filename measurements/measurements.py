@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import sqlite3
+import re
 import logging
 
 from path import Path
 
 from .run import Run
+from .energy_aggregation import EnergyAggregation
 
 logger = logging.getLogger(__name__)
 here = Path(__file__).parent
@@ -30,6 +32,9 @@ class Measurements:
         location = here/'schema.sql'
         logger.debug('Loading schema from {}'.format(location))
         self._source(location)
+
+        logger.debug('Installing energy aggregation')
+        EnergyAggregation.install(self.conn)
 
     def run_test(self, configuration, experiment):
         """
@@ -71,17 +76,33 @@ class Measurements:
 
         return name
 
-    def energy(self):
+    def energy(self, create_table=None, drop_existing=False):
         """
         Yields the energy per each experiment in the database.
+
+        If `create_table` is a string, this also inserts the data into a table
+        with the given name. Additionally, if `drop_existing` is True, then
+        any table with the name given in `create_table`.
+
         """
 
-        cursor = self.conn.cursor()
-        cursor.execute(r'''
-            SELECT id, configuration, experiment, total(power) as energy
-              FROM measurement JOIN run on run.id = measurement.run
-            GROUP BY id
+        query =(r'''
+            SELECT run.id as id,
+                   configuration, experiment,
+                   energy(power, timestamp) as energy,
+                   MIN(timestamp) as started,
+                   MAX(timestamp) as ended,
+                   (MAX(timestamp) - MIN(timestamp))
+                     as elapsed_time -- in milliseconds
+              FROM measurement JOIN run ON measurement.run = run.id
+          GROUP BY run.id;
         ''')
+
+        if create_table:
+            return self._create_table(query, create_table, drop_existing)
+
+        cursor = self.conn.cursor()
+        cursor.execute(query)
 
         return cursor.fetchall()
 
@@ -89,6 +110,25 @@ class Measurements:
         with open(str(name)) as sqlfile:
             self.conn.executescript(sqlfile.read())
         return self
+
+    def _create_table(self, query, name, drop_existing):
+        # Ensure we get a valid table name.
+        if not re.match('^(?!sqlite_)[A-Za-z0-9_]+$', name):
+            raise ValueError('Invalid table name: ' + name)
+
+        command = ''
+
+        if drop_existing:
+            command += 'DROP TABLE IF EXISTS {name};\n'.format(name=name)
+
+        command += (r'''
+            CREATE TABLE {name} AS {query}
+        ''').format(name=name, query=query)
+
+        logger.debug('Executing:\n%s', command)
+
+        self.conn.executescript(command)
+        self.conn.commit()
 
     def _experiment_exists(self, test_name):
         cursor = self.conn.cursor()
