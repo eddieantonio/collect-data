@@ -53,11 +53,23 @@ class EnergyAggregation:
 
 
 def interpoloate_missing_measurements(measurements):
+    """
+    Adds missing samples to the given list of measurements.
+
+    Note: This mutates the original list!
+    """
+
+    # Sort the samples by timestamp; we will then walk through each pair of
+    # chronologically consecutive samples to determine if any samples are
+    # missing in between.
     measurements.sort(key=lambda s: s.timestamp)
 
+    # Create an auxillary storage for interpolated samples as
+    # to note mutate the original list during iteration.
     interpolated = []
 
     for first, second in pairs(measurements):
+        # Determine the number of missing measurements.
         number_missing = missing_measurements(first, second)
         if number_missing == 0:
             continue
@@ -69,10 +81,12 @@ def interpoloate_missing_measurements(measurements):
                      (second.timestamp - first.timestamp))
 
         # Interpolation: simply copy the first measurement for as many missing
-        # measurements as are required.
+        # samples as are required.
         for i in range(number_missing):
+            # Estimated time in milliseconds for this interpolated sample.
+            estimated_time = 1000 * (i + 1) + first.timestamp
             sample = Measurement(watts=first.watts,
-                                 timestamp=first.timestamp + 1000 * (i + 1))
+                                 timestamp=estimated_time)
             interpolated.append(sample)
 
     measurements.extend(interpolated)
@@ -80,12 +94,19 @@ def interpoloate_missing_measurements(measurements):
 
 
 def missing_measurements(first, second):
+    """
+    Returns the number of estimated missing measurements. Usually, this
+    returns 0.
+    """
     assert second.timestamp > first.timestamp
-    difference = (second.timestamp - first.timestamp) / 1000.0 # in seconds
+    difference = (second.timestamp - first.timestamp) / 1000.0  # in seconds
 
     assert round(difference) >= 1
     return round(difference) - 1
 
 
 def pairs(iterable):
+    """
+    Yields each consecutive pair of an iterable.
+    """
     return zip(iterable, islice(iterable, 1, None, 1))
