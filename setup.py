@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(name='Measurements',
       version='0.1.0',
-      description='Run energy experiments with monitoring using a Watts Up?  Pro',
+      description='Run energy tests using a Watts Up? Pro',
       author='Eddie Antonio Santos',
       packages=['measurements'],
       setup_requires=['pytest-runner'],

@@ -40,7 +40,7 @@ def test_energy():
 
 def test_energy_missing_samples():
     """
-    Tests that missing samples are interpolated.
+    Tests that missing samples are interpolated reasonably.
     """
 
     agg = EnergyAggregation()
