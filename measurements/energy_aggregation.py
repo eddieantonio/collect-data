@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 import logging
+import math
 
-from .kahan_sum import KahanSum
+from collections import namedtuple
 
 logger = logging.getLogger(__name__)
+
+Measurement = namedtuple('Measurement', 'watts timestamp')
+
 
 class EnergyAggregation:
     """
@@ -25,15 +29,19 @@ class EnergyAggregation:
     """
 
     def __init__(self):
-        self.sum = KahanSum()
+        # This will collect samples, then in finalize, sum them, and ensure
+        # any missing data is interpolated.
+        self.measurements = []
 
-    def step(self, *args):
-        logging.debug('energy%r', args)
-        value, *_ = args
-        self.sum += float(value)
+    def step(self, watts, timestamp):
+        # Simply accumulate samples.
+        sample = Measurement(float(watts), timestamp)
+        self.measurements.append(sample)
+
+        return self
 
     def finalize(self):
-        return float(self.sum)
+        return math.fsum(sample.watts for sample in self.measurements)
 
     @classmethod
     def install(cls, connection, name='energy'):
