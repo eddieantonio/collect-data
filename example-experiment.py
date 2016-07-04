@@ -2,6 +2,7 @@
 
 import logging
 from time import sleep
+from tqdm import trange
 
 from measurements import Measurements, Experiment, WattsUp
 
@@ -27,10 +28,11 @@ def idle():
     "Place no load on the computer"
     sleep(60)
 
-# Run the tests with the given wattsup.
+# Run the tests with the given wattsup instance.
 measure.run(idle,
             configuration='native',
             repetitions=60,
+            range=trange,
             wattsup=wattsup)
 
 # Finished with the Wattsup.
