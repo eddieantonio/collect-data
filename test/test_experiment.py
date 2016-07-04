@@ -8,11 +8,14 @@ Tests defining and running an Experiment.
 import sqlite3
 import random
 import multiprocessing
+import logging
 
 import pytest
+from path import Path
 
-from measurements import Experiment, Measurements
+from measurements import Experiment, Measurements, WattsUp
 
+here = Path(__file__).dirname()
 
 def test_define_experiment():
     """
@@ -73,21 +76,28 @@ def test_run_measurements():
     conn = sqlite3.connect(':memory:')
     conn.row_factory = sqlite3.Row
     measure = Measurements(conn)
+    config_name = measure.define_configuration('native')
 
     # It should raise a type error unless it gets an Experiment
     with pytest.raises(TypeError):
         measure.run(None)
 
+    fake_wattsup = WattsUp(here/'fake-wattsup.py',
+                           args=('--no-delay',
+                                 '--period', '0'))
+
     # Run the test experiment.
     measure.run(test_experiment,
-                configuration='native',
-                repetitions=repetitions)
+                configuration=config_name,
+                repetitions=repetitions,
+                wattsup=fake_wattsup)
 
     received_data = []
 
     # Get all the data
     while parent.poll(.1):
         received_data.append(parent.recv())
+    fake_wattsup.close()
 
     # Prove that the experimental code ran.
     assert len(received_data) == repetitions, (
@@ -96,7 +106,7 @@ def test_run_measurements():
     assert all(item == 'hello' for item in received_data)
 
     # Prove that the experimental code ran in a different thread.
-    assert len(received_data) == 0, (
+    assert len(mutable) == 0, (
         "Experiment code ran in this process (but shouldn't)"
     )
 

@@ -3,12 +3,14 @@
 import sqlite3
 import re
 import logging
+import multiprocessing
 
 from path import Path
 
 from .run import Run
 from .energy_aggregation import EnergyAggregation
 from .experiment import Experiment
+from .wattsup import WattsUp
 
 logger = logging.getLogger(__name__)
 here = Path(__file__).parent
@@ -37,11 +39,16 @@ class Measurements:
         logger.debug('Installing energy aggregation')
         EnergyAggregation.install(self.conn)
 
-    def run(self, experiment, configuration=None, repetitions=1):
+    def run(self, experiment,
+            configuration=None,
+            repetitions=1,
+            wattsup=None):
         """
         Runs an experiment on a given configuration. May run the experiment
         for as many repetitions as are required.
         """
+
+        # TODO: add per-test timeout?
 
         if not isinstance(experiment, Experiment):
             raise TypeError('Must pass an experiment object')
@@ -49,10 +56,35 @@ class Measurements:
         # Vivify the experiment name.
         self.define_experiment(experiment.name)
 
+        # Create and ready the WattsUp instance if not given.
+        if wattsup is None:
+            wattsup = WattsUp()
+        wattsup.wait_until_ready()
+
         # Run the experiment
         assert repetitions >= 1
         for _ in range(repetitions):
-            experiment.run()
+            process = multiprocessing.Process(target=experiment.run)
+
+            # Do a single run.
+            with self.run_test(configuration, experiment.name) as log:
+                process.start()
+
+                # Enable logging.
+                with wattsup:
+                    while process.is_alive():
+                        watts, time = wattsup.next_measurement()
+                        log.add_measurement(watts, time)
+
+                # Presumably, the process has ended.
+                process.join()
+
+                if process.exitcode != 0:
+                    # TODO: Better error?
+                    raise RuntimeError('Experiment exited unsuccesfully')
+
+        # The experiment should be done.
+        logger.debug('Experiment complete')
 
     def run_test(self, configuration, experiment):
         """

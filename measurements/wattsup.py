@@ -163,6 +163,7 @@ class WattsUp:
 
         status, payload = self._recv()
         assert status == 'data'
+
         measurement, timestamp = payload
         return measurement, timestamp
 

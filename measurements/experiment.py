@@ -5,6 +5,8 @@
 Tests defining and running an Experiment.
 """
 
+import multiprocessing
+
 from types import FunctionType
 
 __all__ = ['Experiment']
