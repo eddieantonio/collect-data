@@ -40,15 +40,15 @@ class Measurements:
         EnergyAggregation.install(self.conn)
 
     def run(self, experiment,
+            # TODO: add per-test timeout?
             configuration=None,
             repetitions=1,
+            range=range,  # Allow for dependency injecting tqdm.trange()
             wattsup=None):
         """
         Runs an experiment on a given configuration. May run the experiment
         for as many repetitions as are required.
         """
-
-        # TODO: add per-test timeout?
 
         if not isinstance(experiment, Experiment):
             raise TypeError('Must pass an experiment object')
@@ -70,7 +70,7 @@ class Measurements:
             with self.run_test(configuration, experiment.name) as log:
                 process.start()
 
-                # Enable logging.
+                # Enable logging from the Watts Up?
                 with wattsup:
                     while process.is_alive():
                         watts, time = wattsup.next_measurement()

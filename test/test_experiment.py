@@ -23,10 +23,12 @@ def test_define_experiment():
     """
     @Experiment
     def some_test_name():
+        "This is the description"
         pass
 
     assert isinstance(some_test_name, Experiment)
     assert some_test_name.name == 'some_test_name'
+    assert some_test_name.description == 'This is the description'
 
 
 def test_define_experiment_requires_function():
