@@ -15,7 +15,7 @@ measure = Measurements('/tmp/test')
 measure.define_configuration('native', 'Linux running on Calzone')
 
 # Replace this with the actual WattsUp application.
-wattsup = WattsUp('./test/fake-wattsup.py')
+wattsup = WattsUp('./test/fake-wattsup.py', args=('--no-delay',))
 
 logger.info('Waiting for Watts Up?...')
 wattsup.wait_until_ready()
