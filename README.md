@@ -65,10 +65,21 @@ If your data is stored in an SQLite database file called `my-power.db`:
 $ python -m measurments --table-name=energy my-power.db
 ```
 
-Then you can access `energy` in SQLite:
+Then you can access the `energy` table in SQLite (or use your favourite driver).
 
 ```sh
 $ sqlite3 -csv -header my-power.db 'SELECT * FROM energy'
+id,configuration,experiment,energy,started,ended,elapsed_time
+2,native,idle,2640.2,1467665307981.03,1467665366137.17,58156.1420898438
+3,native,idle,2685.1,1467665367137.38,1467665426296.44,59159.0610351562
+4,native,idle,2684.8,1467665427299.03,1467665486454.59,59155.5590820313
+5,native,idle,2729.8,1467665487458.47,1467665547626.23,60167.7639160156
+6,native,idle,2684.6,1467665548628.7,1467665607794.03,59165.33203125
+7,native,idle,2640.1,1467665609798.64,1467665667980.85,58182.216796875
+8,native,idle,2684.4,1467665668985.92,1467665728154.63,59168.7067871094
+9,native,idle,2684.8,1467665729156.64,1467665788295.35,59138.71484375
+10,native,idle,2685.5,1467665789300.51,1467665848479.9,59179.3918457031
+...
 ```
 
 Test
