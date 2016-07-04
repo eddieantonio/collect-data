@@ -8,6 +8,7 @@ from path import Path
 
 from .run import Run
 from .energy_aggregation import EnergyAggregation
+from .experiment import Experiment
 
 logger = logging.getLogger(__name__)
 here = Path(__file__).parent
@@ -35,6 +36,23 @@ class Measurements:
 
         logger.debug('Installing energy aggregation')
         EnergyAggregation.install(self.conn)
+
+    def run(self, experiment, configuration=None, repetitions=1):
+        """
+        Runs an experiment on a given configuration. May run the experiment
+        for as many repetitions as are required.
+        """
+
+        if not isinstance(experiment, Experiment):
+            raise TypeError('Must pass an experiment object')
+
+        # Vivify the experiment name.
+        self.define_experiment(experiment.name)
+
+        # Run the experiment
+        assert repetitions >= 1
+        for _ in range(repetitions):
+            experiment.run()
 
     def run_test(self, configuration, experiment):
         """
