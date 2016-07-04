@@ -7,6 +7,7 @@ Tests defining and running an Experiment.
 
 import sqlite3
 import random
+import multiprocessing
 
 import pytest
 
@@ -14,7 +15,9 @@ from measurements import Experiment, Measurements
 
 
 def test_define_experiment():
-
+    """
+    Basic test for constructing an experiment.
+    """
     @Experiment
     def some_test_name():
         pass
@@ -32,8 +35,7 @@ def test_can_run_experiment():
     mutable = []
     sentinel = object()
 
-    # Side-effect of running this function:
-    # mutable will have sentinel added.
+    # Side-effect of running this function: mutable will have sentinel added.
     @Experiment
     def test_experiment():
         mutable.append(sentinel)
@@ -45,16 +47,27 @@ def test_can_run_experiment():
 
 
 def test_run_measurements():
+    """
+    Tests that measurements knows how to run an experiment in a different
+    thread, for the amount required.
+    """
+
     mutable = []
     sentinel = object()
 
     repetitions = random.randint(10, 40)
 
-    # Side-effect of running this function:
-    # mutable will have sentinel added <repetition> times
+    # This is required for interprocess communications
+    parent, child = multiprocessing.Pipe()
+
+    # Side-effect of running this function: mutable will have sentinel added
+    # <repetition> times IN THE PROCESS THE CODE IS RUNNING IN.
+    # Note that this code should run in a different process entirely, so
+    # mutable SHOULD NOT BE CHANGED!
     @Experiment
     def test_experiment():
         mutable.append(sentinel)
+        child.send('hello')
 
     # Start new measurements using in memory database.
     conn = sqlite3.connect(':memory:')
@@ -70,11 +83,22 @@ def test_run_measurements():
                 configuration='native',
                 repetitions=repetitions)
 
+    received_data = []
+
+    # Get all the data
+    while parent.poll(.1):
+        received_data.append(parent.recv())
+
     # Prove that the experimental code ran.
-    assert len(mutable) == repetitions, (
+    assert len(received_data) == repetitions, (
         'Did not call experiment expected number of times'
     )
-    assert all(item is sentinel for item in mutable)
+    assert all(item == 'hello' for item in received_data)
+
+    # Prove that the experimental code ran in a different thread.
+    assert len(received_data) == 0, (
+        "Experiment code ran in this process (but shouldn't)"
+    )
 
     result = conn.execute(r'''
         SELECT :name IN (SELECT name FROM experiment) AS answer
