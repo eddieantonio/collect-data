@@ -54,7 +54,7 @@ class Measurements:
             raise TypeError('Must pass an experiment object')
 
         # Vivify the experiment name.
-        self.define_experiment(experiment.name)
+        self.define_experiment(experiment.name, experiment.description)
 
         # Create and ready the WattsUp instance if not given.
         if wattsup is None:

@@ -71,6 +71,7 @@ def test_run_measurements():
     # mutable SHOULD NOT BE CHANGED!
     @Experiment
     def test_experiment():
+        "Proves it's alive"
         mutable.append(sentinel)
         child.send('hello')
 
@@ -112,6 +113,17 @@ def test_run_measurements():
         "Experiment code ran in this process (but shouldn't)"
     )
 
+    # Check the database for correct data.
+    result = conn.execute(r'''
+        SELECT name, description FROM experiment
+        WHERE name = :name
+    ''', {'name': test_experiment.name}).fetchone()
+
+    assert result, "Did not save experiment"
+    assert result['description'] == test_experiment.description, (
+        "Did not save experiment's description."
+    )
+
     result = conn.execute(r'''
         SELECT :name IN (SELECT name FROM experiment) AS answer
     ''', {'name': test_experiment.name}).fetchone()
@@ -119,7 +131,6 @@ def test_run_measurements():
         'Did not save experiment name'
     )
 
-    # Check the database for correct data.
     result = conn.execute(r'''
         SELECT COUNT(*) as count
           FROM run
