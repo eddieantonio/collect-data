@@ -1,1 +1,2 @@
 bpython>=0.15
+pytest-xdist
