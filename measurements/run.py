@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
+import logging
+
 from . import utc_date
+
+logger = logging.getLogger(__name__)
 
 
 class Run:
@@ -32,9 +36,16 @@ class Run:
 
         return self
 
-    def __exit__(self, *excinfo):
-        # TODO: commit ONLY IF we got the right signal
-        self.connection.commit()
+    def __exit__(self, exc_type, exc_value, traceback):
+        # Exited successfully
+        if exc_type is None:
+            logger.info("Committing %r", self.id)
+            self.connection.commit()
+        else:
+            self.connection.rollback()
+            logger.error("Rolling back run %r (%s/%s)", self.id,
+                         self.configuration, self.experiment,
+                         exc_info=(exc_type, exc_value, traceback))
 
     def add_measurement(self, measurement, time=None):
         """
