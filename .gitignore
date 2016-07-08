@@ -1,3 +1,7 @@
 .cache
 *.egg-info
 .eggs
+venv
+__pycache__/
+*.pyc
+*.sqlite
