@@ -67,7 +67,7 @@ def main(database=':memory:', table_name='energy', delete_existing=False):
             raise UsageError('Database file does not exist: ' + database)
 
     measure = Measurements(database)
-    measure.energy(create_table=table_name, drop_existing=True)
+    measure.energy(create_table=table_name, drop_existing=delete_existing)
 
     return 0
 
