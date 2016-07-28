@@ -15,6 +15,7 @@ Usage::
 
 import subprocess
 import datetime
+import logging
 
 from multiprocessing import Process, Pipe
 from contextlib import suppress
@@ -25,7 +26,7 @@ from sh import which
 __all__ = ['WattsUp']
 
 here = Path(__file__).parent
-
+logger = logging.getLogger(__name__)
 
 class ExitSuccessfully(BaseException):
     """
@@ -64,8 +65,15 @@ class WattsUpMonitor:
         """
         line_buffer = self.proc.stdout.readline()
         timestamp = utcnow()
-        measurement = line_buffer.decode("ascii").strip()
-        self.send_measurement(float(measurement), timestamp)
+        measurement_text = line_buffer.decode("ascii").strip()
+
+        try:
+            measurement = float(measurement_text)
+        except ValueError as exception:
+            logger.exception("Could not read measurement %r:",
+                             measurement_text)
+        else:
+            self.send_measurement(measurement, timestamp)
 
     def handle_control_message(self):
         """
