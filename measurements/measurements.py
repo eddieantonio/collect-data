@@ -5,6 +5,8 @@ import re
 import logging
 import multiprocessing
 
+from time import sleep
+
 from path import Path
 
 from .run import Run
@@ -82,6 +84,9 @@ class Measurements:
                 if process.exitcode != 0:
                     # TODO: Better error?
                     raise RuntimeError('Experiment exited unsuccesfully')
+
+            # Give the machine two minutes of idle time before the next run.
+            sleep(120)
 
         # The experiment should be done.
         logger.debug('Experiment complete')
