@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS experiment(
 --
 -- The individual power measurements exist in `measurement`.
 CREATE TABLE IF NOT EXISTS run(
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    id              INTEGER PRIMARY KEY,
     configuration   TEXT,   -- configuration.name
     experiment      TEXT    -- experiment.name
 );

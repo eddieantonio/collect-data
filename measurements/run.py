@@ -6,6 +6,8 @@ from . import utc_date
 
 logger = logging.getLogger(__name__)
 
+THIRTY_TWO_BITS = 0xFFFFFFFF
+
 
 class Run:
     """
@@ -26,13 +28,16 @@ class Run:
         self.id = None
 
     def __enter__(self):
+        next_id = 1 + self.get_max_id()
+        hashed_id = id_hash(next_id, self.configuration)
+
         self.cursor.execute('BEGIN TRANSACTION')
         self.cursor.execute(r'''
-            INSERT INTO run(configuration, experiment)
-            VALUES (?, ?);
-        ''', (self.configuration, self.experiment))
+            INSERT INTO run(id, configuration, experiment)
+            VALUES (?, ?, ?);
+        ''', (hashed_id, self.configuration, self.experiment))
 
-        self.id = self.cursor.lastrowid
+        self.id = hashed_id
 
         return self
 
@@ -46,6 +51,18 @@ class Run:
             logger.error("Rolling back run %r (%s/%s)", self.id,
                          self.configuration, self.experiment,
                          exc_info=(exc_type, exc_value, traceback))
+
+    def get_max_id(self):
+        """
+        Gets the maximum integer ID for this particular configuration.
+        """
+        cursor = self.connection.cursor()
+        max_id, = cursor.execute('SELECT MAX(id) FROM run WHERE configuration = ?',
+                             (self.configuration,)).fetchone()
+        if max_id is None:
+            return 0
+
+        return int(max_id) & THIRTY_TWO_BITS
 
     def add_measurement(self, measurement, time=None):
         """
@@ -75,3 +92,12 @@ class Run:
         """
         self.add_measurement(measurement)
         return self
+
+
+def id_hash(sequence, configuration):
+    """
+    Creates an ID based on the hash of the configuration.
+    """
+    assert sequence & THIRTY_TWO_BITS == sequence
+    config_hash = hash(configuration) & THIRTY_TWO_BITS
+    return sequence | (config_hash < 32)
