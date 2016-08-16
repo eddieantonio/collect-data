@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import logging
+import hashlib
 
 from . import utc_date
 
 logger = logging.getLogger(__name__)
 
+THIRTY_ONE_BITS = 0x7FFFFFFF
 THIRTY_TWO_BITS = 0xFFFFFFFF
 
 
@@ -29,6 +31,7 @@ class Run:
 
     def __enter__(self):
         next_id = 1 + self.get_max_id()
+        logger.info('Next integer id: %d', next_id)
         hashed_id = id_hash(next_id, self.configuration)
 
         self.cursor.execute('BEGIN TRANSACTION')
@@ -62,6 +65,8 @@ class Run:
         if max_id is None:
             return 0
 
+        assert (max_id >> 32 ==
+                stable_hash(self.configuration) & THIRTY_ONE_BITS)
         return int(max_id) & THIRTY_TWO_BITS
 
     def add_measurement(self, measurement, time=None):
@@ -99,5 +104,13 @@ def id_hash(sequence, configuration):
     Creates an ID based on the hash of the configuration.
     """
     assert sequence & THIRTY_TWO_BITS == sequence
-    config_hash = hash(configuration) & THIRTY_TWO_BITS
-    return sequence | (config_hash < 32)
+    # Get the rightmost 31-bits. 31 so that we don't exceed a 63-bit unsigned
+    # integer. SQLite will freak out if we have an actual 64 bit int...
+    config_hash = stable_hash(configuration) & THIRTY_ONE_BITS
+    result = sequence | (config_hash << 32)
+    assert result < 2**63, "Result too large"
+    return result
+
+
+def stable_hash(string):
+    return int(hashlib.sha256(string.encode('UTF-8')).hexdigest(), 16)

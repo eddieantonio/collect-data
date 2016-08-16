@@ -7,6 +7,8 @@ Runs an experiment.
 
 
 import argparse
+import logging
+
 from contextlib import closing
 
 from tqdm import trange
@@ -36,17 +38,23 @@ parser.add_argument('configuration_name', metavar='CONFIGURATION',
                     choices=CONFIGURATIONS,
                     help=('The name of the machine configuration. Choose one of ' +
                           ', '.join(CONFIGURATIONS.keys())))
+
 parser.add_argument('--fake-wattsup', action='store_true',
                     help='Use the fake wattsup instead.')
+parser.add_argument('-r', '--repetitions', type=int, default=40,
+                    help='Number of test runs to perform')
+parser.add_argument('-z', '--sleep-time', type=int, default=120,
+                    help='Seconds to sleep between test runs')
 
 # Inject parsed arguments into global scope.
 args = parser.parse_args()
 globals().update(args._get_kwargs())
 del args, parser
 
-
 # Set up other random things.
 t = Terminal()
+logging.basicConfig(level=logging.INFO)
+
 
 # Load the measurements.
 measure = Measurements('energy.sqlite')
@@ -66,16 +74,11 @@ print(t.yellow("Waiting for the Watts Up? to start..."))
 wattsup.wait_until_ready()
 print(t.bold_green("Watts Up? ready!"))
 
-# TODO: Create command line argument for repetitions?
-repetitions = 60
-# TODO: Create command line argument for sleep_time?
-sleep_time = 120
 
 print("Running '{t.green}{experiment_name}{t.normal}' "
       "{t.red}{repetitions}{t.normal} times "
       "on {t.blue}{configuration_name}{t.normal}"
       .format(**vars()))
-
 
 # Run the experiment!
 with closing(wattsup):

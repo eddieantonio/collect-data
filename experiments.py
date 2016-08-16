@@ -10,7 +10,8 @@ from measurements import Experiment
 @Experiment
 def idle():
     "Place no load on the computer for one hour."
-    sleep(60 * 60)
+    #sleep(60 * 60)
+    sleep(5)
 
 
 # TODO: Write Chris's tests

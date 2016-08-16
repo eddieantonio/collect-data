@@ -46,7 +46,7 @@ $ python -m measurments --table-name=energy energy.sqlite
 Then you can access the `energy` table in SQLite (or use your favourite driver).
 
 ```sh
-$ sqlite3 -csv -header my-power.db 'SELECT * FROM energy'
+$ sqlite3 -csv -header energy.sqlite 'SELECT * FROM energy'
 id,configuration,experiment,energy,started,ended,elapsed_time
 2,native,idle,2640.2,1467665307981.03,1467665366137.17,58156.1420898438
 3,native,idle,2685.1,1467665367137.38,1467665426296.44,59159.0610351562
