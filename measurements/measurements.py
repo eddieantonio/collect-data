@@ -45,6 +45,7 @@ class Measurements:
             # TODO: add per-test timeout?
             configuration=None,
             repetitions=1,
+            sleep_time=0,
             range=range,  # Allow for dependency injecting tqdm.trange()
             wattsup=None):
         """
@@ -82,11 +83,11 @@ class Measurements:
                 process.join()
 
                 if process.exitcode != 0:
-                    # TODO: Better error?
-                    raise RuntimeError('Experiment exited unsuccesfully')
+                    raise RuntimeError('Experiment exited unsuccesfully:' +
+                                       str(process.exitcode))
 
-            # Give the machine two minutes of idle time before the next run.
-            sleep(120)
+            # Give the machine an arbitrary amount of idle time before the next run.
+            sleep(sleep_time)
 
         # The experiment should be done.
         logger.debug('Experiment complete')
