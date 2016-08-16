@@ -13,45 +13,23 @@ Requires Python 3.5+ and pip (`virtualenv` recommended):
 Usage
 -----
 
-### Running experiments
+### Defining an experiment
 
-Create a Python script to run an experiment:
+Add the experiment to `experiments.py`:
 
 ```python
-from measurements import Measurements, Experiment, WattsUp
-
-# Connect to the database:
-measure = Measurements('my-power.db')
-
-# Setup the System-Under-Test to your liking.
-...
-
-# Give a name to the configuration
-config = measure.define_configuration('docker')
-
-# Write the experiment
 @Experiment
 def fullstack():
-    "This experiment Apache Benchmark on the Pis..."
+    "This experiment runs Apache Benchmark on the Pis..."
     ...
+```
 
-# Start the Watts Up? client
-wattsup = WattsUp()
+### Running an experiments
 
-# Delay until the Watts Up? is reliably delivering power measurements.
-wattsup.wait_until_ready()
+Use `./run-experiment.py`:
 
-# Run the tests 60 times with the given wattsup instance.
-measure.run(idle,
-            repetitions=60,
-            configuration=config,
-            wattsup=wattsup)
-
-# Finished with the Wattsup.
-wattsup.close()
-
-# Teardown the System-Under-Test
-...
+```sh
+$ python run-experiment.py fullstack native
 ```
 
 ### Getting energy data
@@ -59,10 +37,10 @@ wattsup.close()
 Use the module as a script to estimate energy from all of the tests and
 copy it into a table.
 
-If your data is stored in an SQLite database file called `my-power.db`:
+If your data is stored in an SQLite database file called `energy.sqlite`:
 
 ```sh
-$ python -m measurments --table-name=energy my-power.db
+$ python -m measurments --table-name=energy energy.sqlite
 ```
 
 Then you can access the `energy` table in SQLite (or use your favourite driver).
