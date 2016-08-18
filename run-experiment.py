@@ -29,7 +29,7 @@ CONFIGURATIONS = {
 }
 
 # Setup argument parsing.
-parser = argparse.ArgumentParser(description="Run an experiment")
+parser = argparse.ArgumentParser(description="Run an energy experiment")
 parser.add_argument('experiment_name', metavar='EXPERIMENT',
                     choices=VALID_EXPERIMENTS,
                     help=('The name of the experiment to run. Choose one of ' +
@@ -42,9 +42,9 @@ parser.add_argument('configuration_name', metavar='CONFIGURATION',
 parser.add_argument('--fake-wattsup', action='store_true',
                     help='Use the fake wattsup instead.')
 parser.add_argument('-r', '--repetitions', type=int, default=40,
-                    help='Number of test runs to perform')
+                    help='Number of runs to perform (default: %(default)s)')
 parser.add_argument('-z', '--sleep-time', type=int, default=120,
-                    help='Seconds to sleep between test runs')
+                    help='Seconds to sleep between test runs (default: %(default)s)')
 
 # Inject parsed arguments into global scope.
 args = parser.parse_args()
