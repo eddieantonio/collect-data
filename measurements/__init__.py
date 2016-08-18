@@ -7,6 +7,10 @@ Main interface for power and energy measurements.
 from .measurements import Measurements
 from .wattsup import WattsUp
 from .experiment import Experiment
+from .environment import Environment
 
 
-__all__ = ['Measurements', 'Experiment', 'WattsUp']
+env = Environment()
+
+
+__all__ = ['Measurements', 'Experiment', 'WattsUp', 'env']
