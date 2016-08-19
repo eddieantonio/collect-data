@@ -68,7 +68,10 @@ if fake_wattsup:
     wattsup = WattsUp('./test/fake-wattsup.py', args=('--no-delay',))
 else:
     # TODO: unhardcode path
-    wattsup = WattsUp(executable='/home/pi/wattsup/wattsup', args=['ttyUSB0', 'watts'])
+    # Use our special forked version of wattsup:
+    # https://github.com/eddieantonio/wattsup
+    wattsup = WattsUp(executable='/home/pi/wattsup/wattsup-with-restart',
+                      args=['ttyUSB0', 'watts'])
 
 print(t.yellow("Waiting for the Watts Up? to start..."))
 wattsup.wait_until_ready()
