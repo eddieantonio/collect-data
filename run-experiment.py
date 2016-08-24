@@ -72,7 +72,7 @@ else:
     # https://github.com/eddieantonio/wattsup
     wattsup = WattsUp(executable='/home/pi/wattsup-yyongpil/wattsup.py')
 
-print(t.yellow("Waiting for the Watts Up? to start..."))
+print(t.yellow("Waiting for the Watts Up? to start..."), args=('-y'))
 wattsup.wait_until_ready()
 print(t.bold_green("Watts Up? ready!"))
 
