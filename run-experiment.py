@@ -73,7 +73,7 @@ else:
     wattsup = WattsUp(executable='/home/pi/wattsup-yyongpil/wattsup.py', args=('-y'))
 
 print(t.yellow("Waiting for the Watts Up? to start...")
-wattsup.wait_until_ready()
+#wattsup.wait_until_ready()
 print(t.bold_green("Watts Up? ready!"))
 
 
