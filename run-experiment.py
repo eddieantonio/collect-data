@@ -70,8 +70,7 @@ else:
     # TODO: unhardcode path
     # Use our special forked version of wattsup:
     # https://github.com/eddieantonio/wattsup
-    wattsup = WattsUp(executable='/home/pi/wattsup/wattsup-with-restart',
-                      args=['ttyUSB0', 'watts'])
+    wattsup = WattsUp(executable='sudo /home/camclean/repos/wattsup-yyongpil/wattsup.py')
 
 print(t.yellow("Waiting for the Watts Up? to start..."))
 wattsup.wait_until_ready()
