@@ -70,9 +70,9 @@ else:
     # TODO: unhardcode path
     # Use our special forked version of wattsup:
     # https://github.com/eddieantonio/wattsup
-    wattsup = WattsUp(executable='/home/pi/wattsup-yyongpil/wattsup.py', args=('-y'))
+    wattsup = WattsUp(executable='/home/pi/wattsup-yyongpil/wattsup.py')
 
-print(t.yellow("Waiting for the Watts Up? to start...")
+print(t.yellow("Waiting for the Watts Up? to start..."))
 #wattsup.wait_until_ready()
 print(t.bold_green("Watts Up? ready!"))
 
