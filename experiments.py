@@ -39,5 +39,7 @@ def postgresql():
 @Experiment
 def wordpress():
     "Wordpress stress test"
-    # TODO: Write Wordpress stress test
-    raise NotImplementedError
+
+    from sh import tsung
+
+    tsung("-f", "/home/pi/tsung-1.6.0/examples/carson.xml", "start")
