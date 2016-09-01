@@ -33,7 +33,7 @@ def postgresql():
 
     assert 'POSTGRES_HOST' in env, "You forgot to define POSTGRES_HOST"
     pgbench(host=env.POSTGRES_HOST, username=env.POSTGRES_USER or 'postgres',
-            clients=50)
+            client=50, transactions=1000)
 
 
 @Experiment
