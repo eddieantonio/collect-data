@@ -18,10 +18,11 @@ def redis():
     Runs the Redis benchmark. See Solinas 2015 §4.1 for the original
     parameters.
     """
-    from sh import redis_benchmark
+    from sh import ssh,redis_benchmark
 
     assert 'REDIS_HOST' in env, "You forgot to define REDIS_HOST"
-    redis_benchmark(h=env.REDIS_HOST, c=50, r=50000)
+    ssh("root@10.13.13.25", redis_benchmark, h="10.13.13.27", c=50, r=50000)
+    #redis_benchmark(h=env.REDIS_HOST, c=50, r=50000)
 
 
 @Experiment
