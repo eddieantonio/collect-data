@@ -215,6 +215,10 @@ class WattsUp:
     def __exit__(self, *exception_info):
         # Stop sending messages
         self._send('stop_send')
+        # Do a dummy read to discard any data waiting. Concurrency bugs are
+        # the worst...
+        if self._conn.poll():
+            self._recv()
 
     def _send(self, message):
         return self._conn.send(message)
