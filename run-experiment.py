@@ -34,6 +34,9 @@ parser.add_argument('experiment_name', metavar='EXPERIMENT',
                     choices=VALID_EXPERIMENTS,
                     help=('The name of the experiment to run. Choose one of ' +
                           ', '.join(VALID_EXPERIMENTS)))
+# TODO: Determine the configuration from environment variables!
+# Make this an OVERRIDE and provide a warning that you're overriding the
+# configuration.
 parser.add_argument('configuration_name', metavar='CONFIGURATION',
                     choices=CONFIGURATIONS,
                     help=('The name of the machine configuration. Choose one of ' +
