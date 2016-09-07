@@ -208,16 +208,11 @@ class WattsUp:
     def __enter__(self):
         self.wait_until_ready()
 
-        logger.debug("Starting collection.")
-
         # Do as many dummy reads as needed to discard any data waiting from
         # the last test.
         # Concurrency bugs are the worst...
         while self._conn.poll():
-            logger.debug("Discarding dummy data from previous test")
             self._recv()
-
-        logger.debug("Cleared the queue. Recording!")
 
         # Allow sending messages.
         self._send('send')
