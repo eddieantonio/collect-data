@@ -208,6 +208,12 @@ class WattsUp:
     def __enter__(self):
         self.wait_until_ready()
 
+        # Do as many dummy reads as needed to discard any data waiting from
+        # the last test.
+        # Concurrency bugs are the worst...
+        while self._conn.poll():
+            self._recv()
+
         # Allow sending messages.
         self._send('send')
         return self

@@ -34,6 +34,9 @@ parser.add_argument('experiment_name', metavar='EXPERIMENT',
                     choices=VALID_EXPERIMENTS,
                     help=('The name of the experiment to run. Choose one of ' +
                           ', '.join(VALID_EXPERIMENTS)))
+# TODO: Determine the configuration from environment variables!
+# Make this an OVERRIDE and provide a warning that you're overriding the
+# configuration.
 parser.add_argument('configuration_name', metavar='CONFIGURATION',
                     choices=CONFIGURATIONS,
                     help=('The name of the machine configuration. Choose one of ' +
@@ -70,11 +73,10 @@ else:
     # TODO: unhardcode path
     # Use our special forked version of wattsup:
     # https://github.com/eddieantonio/wattsup
-    wattsup = WattsUp(executable='/home/pi/wattsup/wattsup-with-restart',
-                      args=['ttyUSB0', 'watts'])
+    wattsup = WattsUp(executable='/home/pi/wattsup-yyongpil/wattsup.py')
 
 print(t.yellow("Waiting for the Watts Up? to start..."))
-wattsup.wait_until_ready()
+#wattsup.wait_until_ready()
 print(t.bold_green("Watts Up? ready!"))
 
 
