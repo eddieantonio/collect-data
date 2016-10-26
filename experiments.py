@@ -21,8 +21,7 @@ def redis():
     from sh import ssh,redis_benchmark
 
     assert 'REDIS_HOST' in env, "You forgot to define REDIS_HOST"
-    ssh("root@10.13.13.25", redis_benchmark, h="10.13.13.27", c=50, r=50000)
-    #redis_benchmark(h=env.REDIS_HOST, c=50, r=50000)
+    redis_benchmark(h=env.REDIS_HOST, c=50, r=50000)
 
 
 @Experiment
