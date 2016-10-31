@@ -42,4 +42,4 @@ def wordpress():
 
     from sh import tsung
 
-    tsung("-f", "/home/pi/tsung-1.6.0/examples/carson.xml", "start")
+    tsung("-f", "./carson.xml", "start")
