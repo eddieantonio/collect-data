@@ -47,7 +47,8 @@ class Measurements:
             repetitions=1,
             sleep_time=0,
             range=range,  # Allow for dependency injecting tqdm.trange()
-            wattsup=None):
+            wattsup=None,
+            write_back_energy=False):
         """
         Runs an experiment on a given configuration. May run the experiment
         for as many repetitions as are required.
@@ -85,6 +86,10 @@ class Measurements:
                 if process.exitcode != 0:
                     raise RuntimeError('Experiment exited unsuccesfully:' +
                                        str(process.exitcode))
+
+            # Write back the energy instantly.
+            if write_back_energy:
+                log.write_back_energy()
 
             # Give the machine an arbitrary amount of idle time before the next run.
             sleep(sleep_time)

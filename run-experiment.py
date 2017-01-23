@@ -92,4 +92,5 @@ with closing(wattsup):
                 repetitions=repetitions,
                 sleep_time=sleep_time,
                 range=trange,
-                wattsup=wattsup)
+                wattsup=wattsup,
+                write_back_energy=True)

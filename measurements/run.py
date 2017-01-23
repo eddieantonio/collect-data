@@ -96,7 +96,7 @@ class Run:
                 'The run must be written before energy can be calculated'
             )
 
-        self.cursor.execute("""
+        self.connection.execute("""
             INSERT OR FAIL INTO energy(
                 id, configuration, experiment, energy, started, ended, elapsed_time
             ) SELECT run.id as id,
@@ -111,5 +111,3 @@ class Run:
               WHERE id = :id
            GROUP BY run.id;
         """, {'id': self.id})
-        self.connection.commit()
-
