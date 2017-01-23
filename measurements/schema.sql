@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS experiment(
 --
 -- The individual power measurements exist in `measurement`.
 CREATE TABLE IF NOT EXISTS run(
-    id              INTEGER PRIMARY KEY,
+    id              PRIMARY KEY,
     configuration   TEXT REFERENCES configuration(name)
         ON DELETE CASCADE ON UPDATE CASCADE,
     experiment      TEXT REFERENCES experiment(name)
