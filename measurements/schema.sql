@@ -1,4 +1,5 @@
 PRAGMA encoding = "UTF-8";
+PRAGMA foreign_keys = ON;
 
 -- A configuration for the System-Under-Test (SUT).
 --
@@ -7,6 +8,7 @@ PRAGMA encoding = "UTF-8";
 --
 --  native -- All services are run as native Linux processes.
 --  docker -- All services are run within seperate Docker containers.
+--  ssl    -- As with native, but with SSL/TLS enabled.
 CREATE TABLE IF NOT EXISTS configuration(
     name            TEXT PRIMARY KEY,
     description     TEXT
@@ -32,8 +34,10 @@ CREATE TABLE IF NOT EXISTS experiment(
 -- The individual power measurements exist in `measurement`.
 CREATE TABLE IF NOT EXISTS run(
     id              INTEGER PRIMARY KEY,
-    configuration   TEXT,   -- configuration.name
-    experiment      TEXT    -- experiment.name
+    configuration   TEXT REFERENCES configuration(name)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    experiment      TEXT REFERENCES experiment(name)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- The individual power samples for a particular run of an experiment.
@@ -41,10 +45,23 @@ CREATE TABLE IF NOT EXISTS run(
 -- The power samples are the root mean square (RMS) watts recorded for a one
 -- second sampling period (1Hz).
 CREATE TABLE IF NOT EXISTS measurement(
-    run             INTEGER, -- test_run.id
+    run             REFERENCES run(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     timestamp       REAL NOT NULL, -- Unix timestamp in milliseoncds
     power           REAL NOT NULL
 );
 
--- Enables the sequential gathering of run data from the measurement table.
-CREATE INDEX IF NOT EXISTS measurement_run ON measurement (run);
+-- Estimates the energy given the power measurements. This denormalizes the
+-- database a little bit, but makes it easier to share the computed data with
+-- external programs.
+CREATE TABLE IF NOT EXISTS energy(
+    id              PRIMARY KEY REFERENCES run(id),
+    configuration   TEXT REFERENCES configuration(name)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    experiment      TEXT REFERENCES experiment(name)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    energy          REAL NOT NULL,
+    started         REAL NOT NULL,
+    ended           REAL NOT NULL,
+    elapsed_time    REAL NOT NULL
+);
