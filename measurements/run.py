@@ -26,6 +26,7 @@ class Run:
         self.configuration = configuration
         self.cursor = connection.cursor()
         self.id = None
+        self._written = False
 
     def __enter__(self):
         next_id = uuid.uuid1().hex
@@ -46,13 +47,13 @@ class Run:
             # Exited successfully
             logger.info("Committing %s", self.id)
             self.connection.commit()
+            self._written = True
         else:
             # Something bad happened! Roll back.
             self.connection.rollback()
             logger.error("Rolling back run %s (%s/%s)", self.id,
                          self.configuration, self.experiment,
                          exc_info=(exc_type, exc_value, traceback))
-        self.id = None
 
     def add_measurement(self, measurement, time=None):
         """
@@ -84,3 +85,31 @@ class Run:
         """
         self.add_measurement(measurement)
         return self
+
+    def write_back_energy(self):
+        """
+        Write the estimated energy of the entire test back to the database.
+        """
+
+        if not self._written:
+            raise RuntimeError(
+                'The run must be written before energy can be calculated'
+            )
+
+        self.cursor.execute("""
+            INSERT OR FAIL INTO energy(
+                id, configuration, experiment, energy, started, ended, elapsed_time
+            ) SELECT run.id as id,
+                   configuration,
+                   experiment,
+                   energy(power, timestamp) as energy,
+                   MIN(timestamp) as started,
+                   MAX(timestamp) as ended,
+                   (MAX(timestamp) - MIN(timestamp))
+                     as elapsed_time -- in milliseconds
+               FROM measurement JOIN run ON measurement.run = run.id
+              WHERE id = :id
+           GROUP BY run.id;
+        """, {'id': self.id})
+        self.connection.commit()
+
