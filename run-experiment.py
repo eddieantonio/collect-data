@@ -25,7 +25,8 @@ VALID_EXPERIMENTS = [name for name, thing in vars(experiments).items()
 
 CONFIGURATIONS = {
     'native': 'Apps running on one Linux machine natively',
-    'multidocker': 'Apps running across several Docker containers'
+    'multidocker': 'Apps running across several Docker containers',
+    'aufs': 'Apps running in Docker containers obliviously writing to AUFS mounts',
 }
 
 # Setup argument parsing.
