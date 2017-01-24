@@ -96,18 +96,19 @@ class Run:
                 'The run must be written before energy can be calculated'
             )
 
-        self.connection.execute("""
-            INSERT OR FAIL INTO energy(
-                id, configuration, experiment, energy, started, ended, elapsed_time
-            ) SELECT run.id as id,
-                   configuration,
-                   experiment,
-                   energy(power, timestamp) as energy,
-                   MIN(timestamp) as started,
-                   MAX(timestamp) as ended,
-                   (MAX(timestamp) - MIN(timestamp))
-                     as elapsed_time -- in milliseconds
-               FROM measurement JOIN run ON measurement.run = run.id
-              WHERE id = :id
-           GROUP BY run.id;
-        """, {'id': self.id})
+        with self.connection:
+            self.connection.execute("""
+                INSERT OR FAIL INTO energy(
+                    id, configuration, experiment, energy, started, ended, elapsed_time
+                ) SELECT run.id as id,
+                       configuration,
+                       experiment,
+                       energy(power, timestamp) as energy,
+                       MIN(timestamp) as started,
+                       MAX(timestamp) as ended,
+                       (MAX(timestamp) - MIN(timestamp))
+                         as elapsed_time -- in milliseconds
+                   FROM measurement JOIN run ON measurement.run = run.id
+                  WHERE id = :id
+               GROUP BY run.id;
+            """, {'id': self.id})
