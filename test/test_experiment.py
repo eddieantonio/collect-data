@@ -50,6 +50,28 @@ def test_can_run_experiment():
     # Prove that the experimental code ran.
     assert mutable[0] is sentinel
 
+def test_before_each():
+    mutable = []
+    sentinel_before = object()
+    sentinel_main = object()
+
+    # Side-effect of running this function: mutable will have sentinel added.
+    @Experiment
+    def test_experiment():
+        mutable.append(sentinel_main)
+
+    @test_experiment.before_each
+    def before():
+        mutable.append(sentinel_before)
+
+    test_experiment.run_before_each()
+    test_experiment.run()
+
+    # Prove that the experimental code ran.
+    assert len(mutable) == 2
+    assert mutable[0] is sentinel_before
+    assert mutable[1] is sentinel_main
+
 
 def test_run_measurements():
     """

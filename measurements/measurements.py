@@ -68,7 +68,15 @@ class Measurements:
         # Run the experiment
         assert repetitions >= 1
         for _ in range(repetitions):
+
+            # Run the before function.
+            experiment.run_before_each()
+
+            # Give the machine an arbitrary amount of idle time before the next run.
+            sleep(sleep_time)
+
             process = multiprocessing.Process(target=experiment.run)
+
 
             # Do a single run.
             with self.run_test(configuration, experiment.name) as log:
@@ -90,9 +98,6 @@ class Measurements:
             # Write back the energy instantly.
             if write_back_energy:
                 log.write_back_energy()
-
-            # Give the machine an arbitrary amount of idle time before the next run.
-            sleep(sleep_time)
 
         # The experiment should be done.
         logger.debug('Experiment complete')

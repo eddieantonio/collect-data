@@ -34,6 +34,7 @@ class Experiment:
             raise TypeError('Must be used as a function decorator')
 
         self._fn = fn
+        self._before_fn = None
 
     @property
     def name(self):
@@ -50,4 +51,20 @@ class Experiment:
         return self._fn.__doc__
 
     def run(self):
+        """
+        Run the experiment once.
+        """
         return self._fn()
+
+    def run_before_each(self):
+        """
+        Run the function before the run.
+        """
+        if self._before_fn is not None:
+            return self._before_fn()
+
+    def before_each(self, fn):
+        """
+        Decorator that registers the function to run before each test run.
+        """
+        self._before_fn = fn
