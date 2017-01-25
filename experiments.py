@@ -27,7 +27,7 @@ def redis():
 @Experiment
 def postgresql():
     """
-    Place no load on the computer for one hour.
+    Runs pgbench --clients=50 --transactions=1000
     """
     from sh import pgbench
 
@@ -36,9 +36,20 @@ def postgresql():
             client=50, transactions=1000)
 
 
+@postgresql.before_each
+def before_postgresql():
+    """Initializes the benchmark database and drops all the old test data."""
+    from sh import pgbench
+
+    assert 'POSTGRES_HOST' in env, "You forgot to define POSTGRES_HOST"
+    pgbench(initialize=True,
+            host=env.POSTGRES_HOST,
+            username=env.POSTGRES_USER or 'postgres')
+
+
 @Experiment
 def wordpress():
-    "Wordpress stress test"
+    """Wordpress stress test"""
 
     from sh import tsung
 
