@@ -6,6 +6,9 @@ Measurements
 
 Utilities for obtaining energy measurements from a Watts Up? Pro.
 
+See `analysis/` for R scripts used to calculate statistics and generate
+figures.
+
 Setup
 -----
 
