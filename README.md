@@ -1,7 +1,7 @@
 Measurements
 ============
 
-[![DOI](https://zenodo.org/badge/128499966.svg)](https://zenodo.org/badge/latestdoi/128499966)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1215174.svg)](https://doi.org/10.5281/zenodo.1215174)
 
 
 Utilities for obtaining energy measurements from a Watts Up? Pro.
