@@ -1,0 +1,99 @@
+> t.test(docker[docker$experiment == "idle", c("energy")], linux[linux$experiment == "idle", c("energy")], paired = TRUE)
+
+	Paired t-test
+
+data:  docker[docker$experiment == "idle", c("energy")] and linux[linux$experiment == "idle", c("energy")]
+t = 9.5204, df = 14, p-value = 1.711e-07
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 1578.013 2495.761
+sample estimates:
+mean of the differences
+               2036.887
+
+
+> cohensD(docker[docker$experiment == "idle", c("energy")], linux[linux$experiment == "idle", c("energy")])
+[1] 4.157429
+
+> ggplot(data = subset(energy, experiment=="idle"), aes(configuration, energy)) + geom_boxplot() + ggtitle("Idle")
+
+> cor(docker[docker$experiment == "idle", c("energy")], docker[docker$experiment == "idle", c("elapsed_time")])
+[1] 0.05955366
+
+> cor(linux[linux$experiment == "idle", c("energy")], linux[linux$experiment == "idle", c("elapsed_time")])
+[1] -0.1665269
+
+> t.test(docker[docker$experiment == "redis", c("energy")], linux[linux$experiment == "redis", c("energy")], paired = TRUE)
+
+	Paired t-test
+
+data:  docker[docker$experiment == "redis", c("energy")] and linux[linux$experiment == "redis", c("energy")]
+t = 19.689, df = 14, p-value = 1.329e-11
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 654.0028 813.9039
+sample estimates:
+mean of the differences
+               733.9533
+
+
+> cohensD(docker[docker$experiment == "redis", c("energy")], linux[linux$experiment == "redis", c("energy")])
+[1] 8.259761
+
+> ggplot(data = subset(energy, experiment=="redis"), aes(configuration, energy)) + geom_boxplot() + ggtitle("Redis")
+
+> cor(docker[docker$experiment == "redis", c("energy")], docker[docker$experiment == "redis", c("elapsed_time")])
+[1] 0.9821443
+
+> cor(linux[linux$experiment == "redis", c("energy")], linux[linux$experiment == "redis", c("elapsed_time")])
+[1] 0.9688946
+
+> t.test(docker[docker$experiment == "postgresql", c("energy")], linux[linux$experiment == "postgresql", c("energy")], paired = TRUE)
+
+	Paired t-test
+
+data:  docker[docker$experiment == "postgresql", c("energy")] and linux[linux$experiment == "postgresql", c("energy")]
+t = -34.424, df = 14, p-value = 6.23e-15
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -13403.58 -11831.32
+sample estimates:
+mean of the differences
+              -12617.45
+
+
+> cohensD(docker[docker$experiment == "postgresql", c("energy")], linux[linux$experiment == "postgresql", c("energy")])
+[1] 13.16344
+
+> ggplot(data = subset(energy, experiment=="postgresql"), aes(configuration, energy)) + geom_boxplot() + ggtitle("PostgreSQL")
+
+> cor(docker[docker$experiment == "postgresql", c("energy")], docker[docker$experiment == "postgresql", c("elapsed_time")])
+[1] 0.9921901
+
+> cor(linux[linux$experiment == "postgresql", c("energy")], linux[linux$experiment == "postgresql", c("elapsed_time")])
+[1] 0.9956717
+
+> t.test(docker[docker$experiment == "wordpress", c("energy")], linux[linux$experiment == "wordpress", c("energy")], paired = TRUE)
+
+	Paired t-test
+
+data:  docker[docker$experiment == "wordpress", c("energy")] and linux[linux$experiment == "wordpress", c("energy")]
+t = -68.95, df = 14, p-value < 2.2e-16
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -5262.498 -4944.982
+sample estimates:
+mean of the differences
+               -5103.74
+
+
+> cohensD(docker[docker$experiment == "wordpress", c("energy")], linux[linux$experiment == "wordpress", c("energy")])
+[1] 20.57104
+
+> ggplot(data = subset(energy, experiment=="wordpress"), aes(configuration, energy)) + geom_boxplot() + ggtitle("WordPress")
+
+> cor(docker[docker$experiment == "wordpress", c("energy")], docker[docker$experiment == "wordpress", c("elapsed_time")])
+[1] 0.09871972
+
+> cor(linux[linux$experiment == "wordpress", c("energy")], linux[linux$experiment == "wordpress", c("elapsed_time")])
+[1] 0.4105778

@@ -1,0 +1,63 @@
+strace: Process 25999 attached
+^Cstrace: Process 25999 detached
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 86.55    0.096021           0   1700006           write
+  8.95    0.009931           0   1701778           read
+  4.35    0.004825           0     48279           epoll_wait
+  0.07    0.000078           0       928           open
+  0.02    0.000025           0      1778           close
+  0.02    0.000025           0      1700           fcntl
+  0.02    0.000019           0       869        19 accept
+  0.01    0.000009           0      1187           madvise
+  0.01    0.000008           0      1700           epoll_ctl
+  0.00    0.000000           0         6           stat
+  0.00    0.000000           0         9           mmap
+  0.00    0.000000           0         3           munmap
+  0.00    0.000000           0      4250           setsockopt
+  0.00    0.000000           0         2           clone
+  0.00    0.000000           0         2           wait4
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.110941               3462497        19 total
+easantos@greenserver-1:~$ sudo strace -c -p 25999
+strace: Process 25999 attached
+^Cstrace: Process 25999 detached
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 88.08    0.092483           0   1700001           write
+ 10.74    0.011274           0   1701747           read
+  0.99    0.001036           0     52640           epoll_wait
+  0.08    0.000088           0      1790           close
+  0.04    0.000047           0      4025           setsockopt
+  0.04    0.000041          21         2           wait4
+  0.02    0.000023           0       822        17 accept
+  0.01    0.000008           0      1539           madvise
+  0.00    0.000000           0       940           open
+  0.00    0.000000           0         6           stat
+  0.00    0.000000           0         1           mmap
+  0.00    0.000000           0         2           clone
+  0.00    0.000000           0      1610           fcntl
+  0.00    0.000000           0      1655           epoll_ctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.105000               3466780        17 total
+easantos@greenserver-1:~$ sudo strace -c -p 25999
+strace: Process 25999 attached
+^Cstrace: Process 25999 detached
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 88.36    0.093303           0   1699974           write
+ 10.42    0.011005           0   1701719           read
+  0.92    0.000970           0     47369           epoll_wait
+  0.19    0.000201           0      1785           close
+  0.04    0.000045           0       935           open
+  0.03    0.000033           0      4000           setsockopt
+  0.02    0.000018          18         1           wait4
+  0.02    0.000016           0      1844           madvise
+  0.01    0.000006           0      1600           fcntl
+  0.00    0.000000           0         3           stat
+  0.00    0.000000           0         1           mmap
+  0.00    0.000000           0       816        16 accept
+  0.00    0.000000           0         1           clone
+  0.00    0.000000           0      1650           epoll_ctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.105597               3461698        16 total
