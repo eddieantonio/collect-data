@@ -4,9 +4,21 @@ R Stats
 Installing dependencies
 -----------------------
 
-To install **R** dependencies:
+To install **R** dependencies (command line):
 
-    $ Rscript install.R
+    Rscript install.R
+
+Energy/Power Database
+---------------------
+
+You may use these scripts with any database created by the Python
+scripts outside this directory; however, for the Docker paper, we used
+the database linked here:
+
+> energy.sqlite: [10.5281/zenodo.1227250](https://doi.org/10.5281/zenodo.1227250)
+>
+> SHA256 checksum: `3c0af704aae41e48423abf481df7cf682363c69702f7e034ddafd471d74c186f`
+
 
 Running
 -------
