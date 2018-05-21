@@ -11,7 +11,7 @@ figures.
 
 [Read our preprint (PDF)][Paper URI]!
 
-If you use these scripts, please [cite our paper](#Citation)!
+If you use these scripts, please [cite our paper](#citation)!
 
 [Paper URI]: https://arxiv.org/pdf/1705.01176.pdf
 
