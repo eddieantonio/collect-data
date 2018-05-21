@@ -2,12 +2,18 @@ Measurements
 ============
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1215174.svg)](https://doi.org/10.5281/zenodo.1215174)
+[![Preprint](https://img.shields.io/badge/preprint-14%20pages-green.svg)][Paper URI]
 
 
-Utilities for obtaining energy measurements from a Watts Up? Pro.
-
-See `analysis/` for R scripts used to calculate statistics and generate
+Utilities for obtaining energy measurements from a Watts Up? Pro. See
+`analysis/` for R scripts used to calculate statistics and generate
 figures.
+
+[Read our preprint (PDF)][Paper URI]!
+
+If you use these scripts, please [cite our paper](#Citation)!
+
+[Paper URI]: https://arxiv.org/pdf/1705.01176.pdf
 
 Setup
 -----
@@ -80,6 +86,30 @@ Then, simply use `setup.py`:
 ```sh
 python setup.py test
 ```
+
+
+Citation
+========
+
+If you use these scripts in your work, please cite us as follows:
+
+```bibtext
+@article{santos2017docker,
+  author    = {Santos, Eddie Antonio and
+               {McLean}, Carson and
+               Solinas, Christopher and
+               Hindle, Abram},
+  title     = {How does {Docker} affect energy consumption? Evaluating workloads in
+               and out of {Docker} containers},
+  journal   = {{CoRR}},
+  volume    = {abs/1705.01176},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1705.01176},
+  archivePrefix = {arXiv},
+  eprint    = {1705.01176},
+}
+```
+
 
 License
 =======
